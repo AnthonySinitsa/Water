@@ -7,13 +7,14 @@ public class Water : MonoBehaviour
 {
     public Shader waterShader;
     public int size = 10;
-    public int resolution = 20; // Number of vertices per unit length
+    public int resolution = 20;
     public float waveSpeed = 0.2f;
     public float waveScale = 0.5f;
 
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
     private Mesh mesh;
+    private Material waterMaterial;
 
     void Start()
     {
@@ -30,9 +31,18 @@ public class Water : MonoBehaviour
 
         if (waterShader)
         {
-            meshRenderer.material = new Material(waterShader);
-            meshRenderer.material.SetFloat("_WaveSpeed", waveSpeed);
-            meshRenderer.material.SetFloat("_WaveScale", waveScale);
+            waterMaterial = new Material(waterShader);
+            meshRenderer.material = waterMaterial;
+        }
+    }
+
+    void Update()
+    {
+        // Update shader properties dynamically
+        if (waterMaterial)
+        {
+            waterMaterial.SetFloat("_WaveSpeed", waveSpeed);
+            waterMaterial.SetFloat("_WaveScale", waveScale);
         }
     }
 
@@ -40,11 +50,12 @@ public class Water : MonoBehaviour
     {
         int vertexCount = (size * resolution + 1) * (size * resolution + 1);
         Vector3[] vertices = new Vector3[vertexCount];
+        float halfSize = size / 2f;
         for (int y = 0; y <= size * resolution; y++)
         {
             for (int x = 0; x <= size * resolution; x++)
             {
-                vertices[y * (size * resolution + 1) + x] = new Vector3(x / (float)resolution, 0, y / (float)resolution);
+                vertices[y * (size * resolution + 1) + x] = new Vector3(x / (float)resolution - halfSize, 0, y / (float)resolution - halfSize);
             }
         }
         return vertices;
