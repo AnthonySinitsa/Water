@@ -2,62 +2,50 @@ Shader "Custom/WaterShader"
 {
     Properties
     {
-        _MainTex ("Base (RGB)", 2D) = "white" {}
+        _Color ("Color", Color) = (0.2, 0.5, 0.7, 1.0)
         _WaveSpeed ("Wave Speed", Float) = 0.2
         _WaveScale ("Wave Scale", Float) = 0.5
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
-        Pass
+        Tags { "LightMode" = "ForwardBase" }
+
+        CGPROGRAM
+        #pragma surface surf Lambert vertex:vert
+
+        struct Input
         {
-            CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
+            float3 worldPos;
+        };
 
-            #include "UnityCG.cginc"
+        float _WaveSpeed;
+        float _WaveScale;
 
-            struct appdata_t
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
+        void vert(inout appdata_full v)
+        {
+            float time = _Time.y * _WaveSpeed;
+            float x = v.vertex.x * _WaveScale;
+            float z = v.vertex.z * _WaveScale;
 
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
-            };
+            float waveHeight = 
+                sin(x * 1.5 + time * 0.75) * 0.1 + 
+                sin(z * 1.2 + time * 0.5 + 3.14 / 3.0) * 0.2 + 
+                sin((x + z) * 0.6 + time * 1.0) * 0.15 + 
+                sin(x * 0.8 + z * 1.3 + time * 0.7) * 0.1 + 
+                sin(z * 0.9 + x * 1.4 + time * 1.2) * 0.05;
 
-            sampler2D _MainTex;
-            float _WaveSpeed;
-            float _WaveScale;
-
-            v2f vert (appdata_t v)
-            {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
-                return o;
-            }
-
-            float sumOfSines(float x, float z, float t)
-            {
-                return sin(x * 1.0 + t * 0.75) * 0.2 + 
-                       sin(z * 1.5 + t * 0.5) * 0.1 + 
-                       sin((x + z) * 0.5 + t) * 0.05;
-            }
-
-            fixed4 frag (v2f i) : SV_Target
-            {
-                float t = _Time.y * _WaveSpeed;
-                float waveHeight = sumOfSines(i.uv.x * _WaveScale, i.uv.y * _WaveScale, t);
-                fixed4 col = tex2D(_MainTex, i.uv + waveHeight);
-                return col;
-            }
-            ENDCG
+            v.vertex.y += waveHeight;
         }
+
+        float4 _Color;
+
+        void surf(Input IN, inout SurfaceOutput o)
+        {
+            float diffuseLighting = max(1.5, dot(normalize(IN.worldPos - _WorldSpaceLightPos0.xyz), o.Normal));
+            o.Albedo = _Color.rgb * diffuseLighting;
+            o.Normal = normalize(cross(ddx(IN.worldPos), ddy(IN.worldPos)));
+        }
+        ENDCG
     }
     FallBack "Diffuse"
 }

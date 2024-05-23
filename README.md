@@ -1,4 +1,9 @@
 # Water
+
+### First sum of sines waves
+![1](images/water1.gif)
+### Lambertian diffuse lighting
+![2](images/water2.gif)
  
 ## Steps Taken
 
@@ -17,3 +22,8 @@
   - vertex lighting
 
 - Have the vertex shader calculate the sum of sines for each vertex position then send it off to the rest of the render pipeline
+
+- Implement lambertian diffuse lighting
+
+- Specular highlights added to give the water that shine
+  - Blinn Phong Specular

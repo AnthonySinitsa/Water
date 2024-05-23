@@ -249,6 +249,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waterShader: {fileID: 4800000, guid: 1db37d7fe34242842b702ad11d9f1bb8, type: 3}
+  size: 10
+  resolution: 20
+  waveSpeed: 5
+  waveScale: 2
 --- !u!23 &751884616
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -269,7 +273,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 659e7f7c592d90a4dba5b11e9e6104ad, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -399,8 +403,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.20892021, y: 0.19392225, z: -0.042309202, w: 0.9575784}
+  m_LocalPosition: {x: -3.423615, y: 2.8516061, z: -7.5245876}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
