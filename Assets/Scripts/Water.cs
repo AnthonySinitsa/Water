@@ -7,7 +7,7 @@ public class Water : MonoBehaviour
 {
     public Shader waterShader;
     public int size = 10;
-    public int resolution = 20;
+    public int resolution = 20; // Number of vertices per unit length
     public float waveSpeed = 0.2f;
     public float waveScale = 0.5f;
 
@@ -31,6 +31,8 @@ public class Water : MonoBehaviour
         if (waterShader)
         {
             meshRenderer.material = new Material(waterShader);
+            meshRenderer.material.SetFloat("_WaveSpeed", waveSpeed);
+            meshRenderer.material.SetFloat("_WaveScale", waveScale);
         }
     }
 
@@ -66,28 +68,5 @@ public class Water : MonoBehaviour
             }
         }
         return triangles;
-    }
-
-    void Update()
-    {
-        Vector3[] vertices = mesh.vertices;
-        float time = Time.time * waveSpeed;
-
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            Vector3 vertex = vertices[i];
-            vertex.y = SumOfSines(vertex.x * waveScale, vertex.z * waveScale, time);
-            vertices[i] = vertex;
-        }
-
-        mesh.vertices = vertices;
-        mesh.RecalculateNormals();
-    }
-
-    float SumOfSines(float x, float z, float t)
-    {
-        return Mathf.Sin(x + t * 0.75f) * 0.2f + 
-               Mathf.Sin(z + t * 0.5f) * 0.1f + 
-               Mathf.Sin((x + z) * 0.5f + t) * 0.05f;
     }
 }
