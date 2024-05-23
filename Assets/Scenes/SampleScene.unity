@@ -250,6 +250,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waterShader: {fileID: 4800000, guid: 1db37d7fe34242842b702ad11d9f1bb8, type: 3}
   size: 10
+  resolution: 20
   waveSpeed: 0.2
   waveScale: 0.5
 --- !u!23 &751884616

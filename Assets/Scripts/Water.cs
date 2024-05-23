@@ -7,6 +7,7 @@ public class Water : MonoBehaviour
 {
     public Shader waterShader;
     public int size = 10;
+    public int resolution = 20;
     public float waveSpeed = 0.2f;
     public float waveScale = 0.5f;
 
@@ -35,12 +36,13 @@ public class Water : MonoBehaviour
 
     Vector3[] GenerateVertices()
     {
-        Vector3[] vertices = new Vector3[(size + 1) * (size + 1)];
-        for (int y = 0; y <= size; y++)
+        int vertexCount = (size * resolution + 1) * (size * resolution + 1);
+        Vector3[] vertices = new Vector3[vertexCount];
+        for (int y = 0; y <= size * resolution; y++)
         {
-            for (int x = 0; x <= size; x++)
+            for (int x = 0; x <= size * resolution; x++)
             {
-                vertices[y * (size + 1) + x] = new Vector3(x, 0, y);
+                vertices[y * (size * resolution + 1) + x] = new Vector3(x / (float)resolution, 0, y / (float)resolution);
             }
         }
         return vertices;
@@ -48,19 +50,19 @@ public class Water : MonoBehaviour
 
     int[] GenerateTriangles()
     {
-        int[] triangles = new int[size * size * 6];
+        int[] triangles = new int[size * size * resolution * resolution * 6];
         int index = 0;
-        for (int y = 0; y < size; y++)
+        for (int y = 0; y < size * resolution; y++)
         {
-            for (int x = 0; x < size; x++)
+            for (int x = 0; x < size * resolution; x++)
             {
-                triangles[index++] = (y * (size + 1)) + x;
-                triangles[index++] = ((y + 1) * (size + 1)) + x;
-                triangles[index++] = (y * (size + 1)) + x + 1;
+                triangles[index++] = (y * (size * resolution + 1)) + x;
+                triangles[index++] = ((y + 1) * (size * resolution + 1)) + x;
+                triangles[index++] = (y * (size * resolution + 1)) + x + 1;
 
-                triangles[index++] = ((y + 1) * (size + 1)) + x;
-                triangles[index++] = ((y + 1) * (size + 1)) + x + 1;
-                triangles[index++] = (y * (size + 1)) + x + 1;
+                triangles[index++] = ((y + 1) * (size * resolution + 1)) + x;
+                triangles[index++] = ((y + 1) * (size * resolution + 1)) + x + 1;
+                triangles[index++] = (y * (size * resolution + 1)) + x + 1;
             }
         }
         return triangles;
@@ -85,8 +87,7 @@ public class Water : MonoBehaviour
     float SumOfSines(float x, float z, float t)
     {
         return Mathf.Sin(x + t * 0.75f) * 0.2f + 
-            Mathf.Sin(z + t * 0.5f) * 0.1f + 
-            Mathf.Sin((x + z) * 0.5f + t) * 0.05f;
+               Mathf.Sin(z + t * 0.5f) * 0.1f + 
+               Mathf.Sin((x + z) * 0.5f + t) * 0.05f;
     }
-
 }
