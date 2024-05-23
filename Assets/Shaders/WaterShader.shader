@@ -8,10 +8,7 @@ Shader "Custom/WaterShader"
     }
     SubShader
     {
-        Tags {
-			"LightMode" = "ForwardBase"
-		}
-        LOD 200
+        Tags { "LightMode" = "ForwardBase" }
 
         CGPROGRAM
         #pragma surface surf Lambert vertex:vert
@@ -44,8 +41,9 @@ Shader "Custom/WaterShader"
 
         void surf(Input IN, inout SurfaceOutput o)
         {
-            o.Albedo = _Color.rgb;
-            o.Alpha = _Color.a;
+            float diffuseLighting = max(1.5, dot(normalize(IN.worldPos - _WorldSpaceLightPos0.xyz), o.Normal));
+            o.Albedo = _Color.rgb * diffuseLighting;
+            o.Normal = normalize(cross(ddx(IN.worldPos), ddy(IN.worldPos)));
         }
         ENDCG
     }
