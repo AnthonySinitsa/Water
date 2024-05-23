@@ -1,4 +1,9 @@
 # Water
+
+### First sum of sines waves
+![1](images/water1.gif)
+### Lambertian diffuse lighting
+![2](images/water2.gif)
  
 ## Steps Taken
 
