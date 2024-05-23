@@ -8,7 +8,9 @@ Shader "Custom/WaterShader"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags {
+			"LightMode" = "ForwardBase"
+		}
         LOD 200
 
         CGPROGRAM
@@ -25,9 +27,16 @@ Shader "Custom/WaterShader"
         void vert(inout appdata_full v)
         {
             float time = _Time.y * _WaveSpeed;
-            float waveHeight = sin(v.vertex.x * _WaveScale + time * 0.75) * 0.2 +
-                               sin(v.vertex.z * _WaveScale + time * 0.5) * 0.1 +
-                               sin((v.vertex.x + v.vertex.z) * 0.5 * _WaveScale + time) * 0.05;
+            float x = v.vertex.x * _WaveScale;
+            float z = v.vertex.z * _WaveScale;
+
+            float waveHeight = 
+                sin(x * 1.5 + time * 0.75) * 0.1 + 
+                sin(z * 1.2 + time * 0.5 + 3.14 / 3.0) * 0.2 + 
+                sin((x + z) * 0.6 + time * 1.0) * 0.15 + 
+                sin(x * 0.8 + z * 1.3 + time * 0.7) * 0.1 + 
+                sin(z * 0.9 + x * 1.4 + time * 1.2) * 0.05;
+
             v.vertex.y += waveHeight;
         }
 
