@@ -5,13 +5,15 @@ Shader "Custom/WaterShader"
         _Color ("Color", Color) = (0.2, 0.5, 0.7, 1.0)
         _WaveSpeed ("Wave Speed", Float) = 0.2
         _WaveScale ("Wave Scale", Float) = 0.5
+        _MySpecColor ("Specular Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        _Shininess ("Shininess", Range(1, 100)) = 30
     }
     SubShader
     {
         Tags { "LightMode" = "ForwardBase" }
 
         CGPROGRAM
-        #pragma surface surf Lambert vertex:vert
+        #pragma surface frag Lambert vertex:vert
 
         struct Input
         {
@@ -20,6 +22,8 @@ Shader "Custom/WaterShader"
 
         float _WaveSpeed;
         float _WaveScale;
+        float4 _MySpecColor;
+        half _Shininess;
 
         void vert(inout appdata_full v)
         {
@@ -39,11 +43,22 @@ Shader "Custom/WaterShader"
 
         float4 _Color;
 
-        void surf(Input IN, inout SurfaceOutput o)
+        void frag(Input IN, inout SurfaceOutput o)
         {
-            float diffuseLighting = max(1.5, dot(normalize(IN.worldPos - _WorldSpaceLightPos0.xyz), o.Normal));
-            o.Albedo = _Color.rgb * diffuseLighting;
+            // Calculate the normal based on the vertex normal
             o.Normal = normalize(cross(ddx(IN.worldPos), ddy(IN.worldPos)));
+
+            // Calculate Lambertian diffuse lighting
+            half3 lightDir = normalize(_WorldSpaceLightPos0.xyz - IN.worldPos);
+            half diffuse = max(1.5, dot(o.Normal, lightDir));
+            o.Albedo = _Color.rgb * diffuse;
+
+            // Calculate Blinn-Phong specular lighting
+            half3 viewDir = normalize(_WorldSpaceCameraPos - IN.worldPos);
+            half3 halfwayDir = normalize(lightDir + viewDir);
+            half spec = pow(max(1, dot(o.Normal, halfwayDir)), _Shininess);
+            o.Gloss = spec;
+            o.Specular = _MySpecColor.rgb * spec;
         }
         ENDCG
     }
