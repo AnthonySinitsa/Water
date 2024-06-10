@@ -10,6 +10,8 @@ Shader "Custom/DistortionFlow" {
         _Speed ("Speed", Float) = 1
         _FlowStrength ("Flow Strength", Float) = 1
         _FlowOffset ("Flow Offset", Float) = 0
+        _HeightScale ("Height Scale, Constant", Float) = 0.25
+		_HeightScaleModulated ("Height Scale, Modulated", Float) = 0.75
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
@@ -24,7 +26,7 @@ Shader "Custom/DistortionFlow" {
         #include "Flow.cginc"
 
 		sampler2D _MainTex, _FlowMap, _DerivHeightMap;
-        float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset;
+        float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset, _HeightScale, _HeightScaleModulated;
 
 		struct Input {
 			float2 uv_MainTex;
@@ -56,10 +58,16 @@ Shader "Custom/DistortionFlow" {
 				_FlowOffset, _Tiling, time, true
 			);
 
-            float3 dhA =
-				UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwA.xy)) * uvwA.z;
+            float finalHeightScale =
+				length(flowVector) * _HeightScaleModulated + _HeightScale;
+
+			float3 dhA =
+				UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwA.xy)) *
+				(uvwA.z * finalHeightScale);
 			float3 dhB =
-				UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwB.xy)) * uvwB.z;
+				UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwB.xy)) *
+				(uvwB.z * finalHeightScale);
+                
 			o.Normal = normalize(float3(-(dhA.xy + dhB.xy), 1));
 
 			fixed4 texA = tex2D(_MainTex, uvwA.xy) * uvwA.z;
