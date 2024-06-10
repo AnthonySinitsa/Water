@@ -43,23 +43,24 @@ Shader "Custom/DistortionFlow" {
 		}
 
 		void surf (Input IN, inout SurfaceOutputStandard o) {
-            float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg * 2 - 1;
-            flowVector *= _FlowStrength;
+            float3 flow = tex2D(_FlowMap, IN.uv_MainTex).rgb;
+			flow.xy = flow.xy * 2 - 1;
+			flow *= _FlowStrength;
 			float noise = tex2D(_FlowMap, IN.uv_MainTex).a;
 			float time = _Time.y * _Speed + noise;
             float2 jump = float2(_UJump, _VJump);
 
             float3 uvwA = FlowUVW(
-				IN.uv_MainTex, flowVector, jump,
+				IN.uv_MainTex, flow.xy, jump,
 				_FlowOffset, _Tiling, time, false
 			);
 			float3 uvwB = FlowUVW(
-				IN.uv_MainTex, flowVector, jump,
+				IN.uv_MainTex, flow.xy, jump,
 				_FlowOffset, _Tiling, time, true
 			);
 
             float finalHeightScale =
-				length(flowVector) * _HeightScaleModulated + _HeightScale;
+				length(flow.z) * _HeightScaleModulated + _HeightScale;
 
 			float3 dhA =
 				UnpackDerivativeHeight(tex2D(_DerivHeightMap, uvwA.xy)) *
@@ -75,7 +76,6 @@ Shader "Custom/DistortionFlow" {
 
 			fixed4 c = (texA + texB) * _Color;
 			o.Albedo = c.rgb;
-            o.Albedo = pow(dhA.z + dhB.z, 2);
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 			o.Alpha = c.a;
