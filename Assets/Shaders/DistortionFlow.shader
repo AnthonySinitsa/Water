@@ -30,8 +30,14 @@ Shader "Custom/DistortionFlow" {
             float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg * 2 - 1;
 			float noise = tex2D(_FlowMap, IN.uv_MainTex).a;
 			float time = _Time.y + noise;
-			float3 uvw = FlowUVW(IN.uv_MainTex, flowVector, time);
-			fixed4 c = tex2D(_MainTex, uvw.xy) * uvw.z * _Color;
+
+			float3 uvwA = FlowUVW(IN.uv_MainTex, flowVector, time, false);
+			float3 uvwB = FlowUVW(IN.uv_MainTex, flowVector, time, true);
+
+			fixed4 texA = tex2D(_MainTex, uvwA.xy) * uvwA.z;
+			fixed4 texB = tex2D(_MainTex, uvwB.xy) * uvwB.z;
+
+			fixed4 c = (texA + texB) * _Color;
 			o.Albedo = c.rgb;
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
