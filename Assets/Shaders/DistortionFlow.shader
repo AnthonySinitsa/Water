@@ -27,11 +27,10 @@ Shader "Custom/DistortionFlow" {
 		fixed4 _Color;
 
 		void surf (Input IN, inout SurfaceOutputStandard o) {
-            float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg;
-			float2 uv = FlowUV(IN.uv_MainTex, _Time.y);
+            float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg * 2 - 1;
+			float2 uv = FlowUV(IN.uv_MainTex, flowVector, _Time.y);
 			fixed4 c = tex2D(_MainTex, uv) * _Color;
 			o.Albedo = c.rgb;
-			o.Albedo = float3(flowVector, 0);
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 			o.Alpha = c.a;
