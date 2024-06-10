@@ -3,12 +3,12 @@
 
 float3 FlowUVW (
 	float2 uv, float2 flowVector, float2 jump, 
-    float tiling, float time, bool flowB
+    float flowOffset, float tiling, float time, bool flowB
 ) {
 	float phaseOffset = flowB ? 0.5 : 0;
 	float progress = frac(time + phaseOffset);
 	float3 uvw;
-	uvw.xy = uv - flowVector * progress;
+	uvw.xy = uv - flowVector * (progress + flowOffset);
     uvw.xy *= tiling;
 	uvw.xy += phaseOffset;
 	uvw.xy += (time - progress) * jump;

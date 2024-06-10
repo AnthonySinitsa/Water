@@ -8,6 +8,7 @@ Shader "Custom/DistortionFlow" {
         _Tiling ("Tiling", Float) = 1
         _Speed ("Speed", Float) = 1
         _FlowStrength ("Flow Strength", Float) = 1
+        _FlowOffset ("Flow Offset", Float) = 0
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
@@ -22,7 +23,7 @@ Shader "Custom/DistortionFlow" {
         #include "Flow.cginc"
 
 		sampler2D _MainTex, _FlowMap;
-        float _UJump, _VJump, _Tiling, _Speed, _FlowStrength;
+        float _UJump, _VJump, _Tiling, _Speed, _FlowStrength, _FlowOffset;
 
 		struct Input {
 			float2 uv_MainTex;
@@ -39,8 +40,14 @@ Shader "Custom/DistortionFlow" {
 			float time = _Time.y * _Speed + noise;
             float2 jump = float2(_UJump, _VJump);
 
-			float3 uvwA = FlowUVW(IN.uv_MainTex, flowVector, jump, _Tiling, time, false);
-			float3 uvwB = FlowUVW(IN.uv_MainTex, flowVector, jump, _Tiling, time, true);
+            float3 uvwA = FlowUVW(
+				IN.uv_MainTex, flowVector, jump,
+				_FlowOffset, _Tiling, time, false
+			);
+			float3 uvwB = FlowUVW(
+				IN.uv_MainTex, flowVector, jump,
+				_FlowOffset, _Tiling, time, true
+			);
 
 			fixed4 texA = tex2D(_MainTex, uvwA.xy) * uvwA.z;
 			fixed4 texB = tex2D(_MainTex, uvwB.xy) * uvwB.z;
