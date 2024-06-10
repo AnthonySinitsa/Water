@@ -2,6 +2,7 @@ Shader "Custom/DistortionFlow" {
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
+        [NoScaleOffset] _FlowMap ("Flow (RG)", 2D) = "black" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
@@ -15,7 +16,7 @@ Shader "Custom/DistortionFlow" {
 
         #include "Flow.cginc"
 
-		sampler2D _MainTex;
+		sampler2D _MainTex, _FlowMap;
 
 		struct Input {
 			float2 uv_MainTex;
@@ -26,9 +27,11 @@ Shader "Custom/DistortionFlow" {
 		fixed4 _Color;
 
 		void surf (Input IN, inout SurfaceOutputStandard o) {
-            float2 uv = FlowUV(IN.uv_MainTex, _Time.y);
+            float2 flowVector = tex2D(_FlowMap, IN.uv_MainTex).rg;
+			float2 uv = FlowUV(IN.uv_MainTex, _Time.y);
 			fixed4 c = tex2D(_MainTex, uv) * _Color;
 			o.Albedo = c.rgb;
+			o.Albedo = float3(flowVector, 0);
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
 			o.Alpha = c.a;
