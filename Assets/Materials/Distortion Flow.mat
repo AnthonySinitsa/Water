@@ -27,6 +27,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _DerivHeightMap:
+        m_Texture: {fileID: 2800000, guid: 0366a17dd98310545b39ddc0ceb35e1d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -76,8 +80,10 @@ Material:
     - _FlowOffset: 0
     - _FlowStrength: 0.1
     - _GlossMapScale: 1
-    - _Glossiness: 1
+    - _Glossiness: 0.7
     - _GlossyReflections: 1
+    - _HeightScale: -0.71
+    - _HeightScaleModulated: 9
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -92,6 +98,6 @@ Material:
     - _VJump: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0, g: 0, b: 0, a: 1}
+    - _Color: {r: 0.30588236, g: 0.5137255, b: 0.6627451, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
