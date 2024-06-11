@@ -6,6 +6,7 @@ Shader "Custom/Waves" {
 		_Metallic ("Metallic", Range(0,1)) = 0.0
         _Amplitude ("Amplitude", Float) = 1
         _Wavelength ("Wavelength", Float) = 10
+        _Speed ("Speed", Float) = 1
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -24,15 +25,20 @@ Shader "Custom/Waves" {
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
-        float _Amplitude, _Wavelength;
+        float _Amplitude, _Wavelength, _Speed;
 
 		void vert(inout appdata_full vertexData) {
             float3 p = vertexData.vertex.xyz;
 
             float k = 2 * UNITY_PI / _Wavelength;
-			p.y = _Amplitude * sin(k * p.x);
+            float f = k * (p.x - _Speed * _Time.y);
+			p.y = _Amplitude * sin(f);
+
+            float3 tangent = normalize(float3(1, k * _Amplitude * cos(f), 0));
+			float3 normal = float3(-tangent.y, tangent.x, 0);
 
 			vertexData.vertex.xyz = p;
+			vertexData.normal = normal;
         }
 
 		void surf (Input IN, inout SurfaceOutputStandard o) {
