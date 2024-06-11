@@ -27,32 +27,32 @@ Shader "Custom/Waves" {
         float4 _WaveA, _WaveB, _WaveC;
 
         float3 GerstnerWave (
-			float4 wave, float3 p, inout float3 tangent, inout float3 binormal
-		) {
-		    float steepness = wave.z;
-		    float wavelength = wave.w;
-		    float k = 2 * UNITY_PI / wavelength;
-			float c = sqrt(9.8 / k);
-			float2 d = normalize(wave.xy);
-			float f = k * (dot(d, p.xz) - c * _Time.y);
-			float a = steepness / k;
-			
-			tangent += float3(
-				-d.x * d.x * (steepness * sin(f)),
-				d.x * (steepness * cos(f)),
-				-d.x * d.y * (steepness * sin(f))
-			);
-			binormal += float3(
-				-d.x * d.y * (steepness * sin(f)),
-				d.y * (steepness * cos(f)),
-				-d.y * d.y * (steepness * sin(f))
-			);
-			return float3(
-				d.x * (a * cos(f)),
-				a * sin(f),
-				d.y * (a * cos(f))
-			);
-		}
+            float4 waveParameters, float3 position, inout float3 tangent, inout float3 binormal
+        ) {
+            float steepness = waveParameters.z;
+            float wavelength = waveParameters.w;
+            float waveNumber = 2 * UNITY_PI / wavelength;
+            float phaseSpeed = sqrt(9.8 / waveNumber);
+            float2 direction = normalize(waveParameters.xy);
+            float phase = waveNumber * (dot(direction, position.xz) - phaseSpeed * _Time.y);
+            float amplitude = steepness / waveNumber;
+
+            tangent += float3(
+                -direction.x * direction.x * (steepness * sin(phase)),
+                direction.x * (steepness * cos(phase)),
+                -direction.x * direction.y * (steepness * sin(phase))
+            );
+            binormal += float3(
+                -direction.x * direction.y * (steepness * sin(phase)),
+                direction.y * (steepness * cos(phase)),
+                -direction.y * direction.y * (steepness * sin(phase))
+            );
+            return float3(
+                direction.x * (amplitude * cos(phase)),
+                amplitude * sin(phase),
+                direction.y * (amplitude * cos(phase))
+            );
+        }
 
 		void vert(inout appdata_full vertexData) {
             float3 gridPoint = vertexData.vertex.xyz;
