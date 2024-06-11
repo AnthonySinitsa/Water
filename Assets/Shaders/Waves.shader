@@ -4,7 +4,7 @@ Shader "Custom/Waves" {
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
-        _Amplitude ("Amplitude", Float) = 1
+        _Steepness ("Steepness", Range(0, 1)) = 0.5
         _Wavelength ("Wavelength", Float) = 10
         _Speed ("Speed", Float) = 1
 	}
@@ -25,19 +25,20 @@ Shader "Custom/Waves" {
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
-        float _Amplitude, _Wavelength, _Speed;
+        float _Steepness, _Wavelength, _Speed;
 
 		void vert(inout appdata_full vertexData) {
             float3 p = vertexData.vertex.xyz;
 
             float k = 2 * UNITY_PI / _Wavelength;
             float f = k * (p.x - _Speed * _Time.y);
-            p.x += _Amplitude * cos(f);
-			p.y = _Amplitude * sin(f);
+            float a = _Steepness / k;
+            p.x += a * cos(f);
+			p.y = a * sin(f);
 
             float3 tangent = normalize(float3(
-				1 - k * _Amplitude * sin(f),
-				k * _Amplitude * cos(f),
+				1 - k * a * sin(f),
+				k * a * cos(f),
 				0
 			));
 			float3 normal = float3(-tangent.y, tangent.x, 0);
