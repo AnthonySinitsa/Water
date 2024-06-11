@@ -11,7 +11,8 @@ Material:
   m_Shader: {fileID: 4800000, guid: 63259e43d9412704f8ccf03adcd4a921, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _DUAL_GRID
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -69,10 +70,12 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _DualGrid: 1
     - _FlowStrength: 0.1
     - _GlossMapScale: 1
     - _Glossiness: 0.7
     - _GlossyReflections: 1
+    - _GridResolution: 10
     - _HeightScale: 0.1
     - _HeightScaleModulated: 9
     - _Metallic: 0
@@ -84,6 +87,7 @@ Material:
     - _Speed: 0.5
     - _SrcBlend: 1
     - _Tiling: 1
+    - _TilingModulated: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
