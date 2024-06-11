@@ -1,10 +1,9 @@
 fileFormatVersion: 2
-guid: 0ff4bd089425bbc4aa09c593aec93c93
+guid: d50576610964bdc4e89d6f33e99980c0
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences:
-  - waterShader: {fileID: 4800000, guid: 1db37d7fe34242842b702ad11d9f1bb8, type: 3}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
