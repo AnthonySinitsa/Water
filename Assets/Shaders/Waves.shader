@@ -35,7 +35,11 @@ Shader "Custom/Waves" {
             p.x += _Amplitude * cos(f);
 			p.y = _Amplitude * sin(f);
 
-            float3 tangent = normalize(float3(1, k * _Amplitude * cos(f), 0));
+            float3 tangent = normalize(float3(
+				1 - k * _Amplitude * sin(f),
+				k * _Amplitude * cos(f),
+				0
+			));
 			float3 normal = float3(-tangent.y, tangent.x, 0);
 
 			vertexData.vertex.xyz = p;
