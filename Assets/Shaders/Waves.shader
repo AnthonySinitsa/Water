@@ -6,7 +6,6 @@ Shader "Custom/Waves" {
 		_Metallic ("Metallic", Range(0,1)) = 0.0
         _Steepness ("Steepness", Range(0, 1)) = 0.5
         _Wavelength ("Wavelength", Float) = 10
-        _Speed ("Speed", Float) = 1
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -25,13 +24,14 @@ Shader "Custom/Waves" {
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color;
-        float _Steepness, _Wavelength, _Speed;
+        float _Steepness, _Wavelength;
 
 		void vert(inout appdata_full vertexData) {
             float3 p = vertexData.vertex.xyz;
 
             float k = 2 * UNITY_PI / _Wavelength;
-            float f = k * (p.x - _Speed * _Time.y);
+            float c = sqrt(9.8 / k);
+            float f = k * (p.x - c * _Time.y);
             float a = _Steepness / k;
             p.x += a * cos(f);
 			p.y = a * sin(f);
