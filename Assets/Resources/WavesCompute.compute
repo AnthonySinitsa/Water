@@ -2,6 +2,9 @@
 
 RWStructuredBuffer<float3> vertices;
 StructuredBuffer<float4> waveParams;
+float _Time;
+
+#define UNITY_PI 3.14159265358979323846
 
 [numthreads(256, 1, 1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -18,7 +21,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         float waveNumber = 2 * UNITY_PI / wavelength;
         float phaseSpeed = sqrt(9.8 / waveNumber);
         float2 direction = normalize(waveParameters.xy);
-        float phase = waveNumber * (dot(direction, position.xz) - phaseSpeed * _Time.y);
+        float phase = waveNumber * (dot(direction, position.xz) - phaseSpeed * _Time);
         float amplitude = steepness / waveNumber;
 
         tangent += float3(
