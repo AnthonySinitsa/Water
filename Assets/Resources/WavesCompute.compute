@@ -1,0 +1,42 @@
+#pragma kernel CSMain
+
+RWStructuredBuffer<float3> vertices;
+StructuredBuffer<float4> waveParams;
+
+[numthreads(256, 1, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float3 position = vertices[id.x];
+    float3 tangent = float3(1, 0, 0);
+    float3 binormal = float3(0, 0, 1);
+
+    for (int i = 0; i < 3; i++)
+    {
+        float4 waveParameters = waveParams[i];
+        float steepness = waveParameters.z;
+        float wavelength = waveParameters.w;
+        float waveNumber = 2 * UNITY_PI / wavelength;
+        float phaseSpeed = sqrt(9.8 / waveNumber);
+        float2 direction = normalize(waveParameters.xy);
+        float phase = waveNumber * (dot(direction, position.xz) - phaseSpeed * _Time.y);
+        float amplitude = steepness / waveNumber;
+
+        tangent += float3(
+            -direction.x * direction.x * (steepness * sin(phase)),
+            direction.x * (steepness * cos(phase)),
+            -direction.x * direction.y * (steepness * sin(phase))
+        );
+        binormal += float3(
+            -direction.x * direction.y * (steepness * sin(phase)),
+            direction.y * (steepness * cos(phase)),
+            -direction.y * direction.y * (steepness * sin(phase))
+        );
+        position += float3(
+            direction.x * (amplitude * cos(phase)),
+            amplitude * sin(phase),
+            direction.y * (amplitude * cos(phase))
+        );
+    }
+
+    vertices[id.x] = position;
+}
