@@ -36,20 +36,23 @@ Shader "Custom/Waves" {
 			float phase = waveNumber * (dot(direction, position.xz) - phaseSpeed * _Time.y);
 			float amplitude = steepness / waveNumber;
 
+			float expSinPhase = exp(sin(phase));
+			float expCosPhase = exp(cos(phase));
+
 			tangent += float3(
-				-direction.x * direction.x * (steepness * sin(phase)),
-				direction.x * (steepness * cos(phase)),
-				-direction.x * direction.y * (steepness * sin(phase))
+				-direction.x * direction.x * (steepness * expSinPhase),
+				direction.x * (steepness * expCosPhase),
+				-direction.x * direction.y * (steepness * expSinPhase)
 			);
 			binormal += float3(
-				-direction.x * direction.y * (steepness * sin(phase)),
-				direction.y * (steepness * cos(phase)),
-				-direction.y * direction.y * (steepness * sin(phase))
+				-direction.x * direction.y * (steepness * expSinPhase),
+				direction.y * (steepness * expCosPhase),
+				-direction.y * direction.y * (steepness * expSinPhase)
 			);
 			return float3(
-				direction.x * (amplitude * cos(phase)),
-				amplitude * sin(phase),
-				direction.y * (amplitude * cos(phase))
+				direction.x * (amplitude * expCosPhase),
+				amplitude * expSinPhase,
+				direction.y * (amplitude * expCosPhase)
 			);
 		}
 
