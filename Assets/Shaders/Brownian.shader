@@ -1,4 +1,4 @@
-Shader "Custom/Waves" {
+Shader "Custom/Brownian" {
   	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
@@ -24,37 +24,6 @@ Shader "Custom/Waves" {
 		half _Glossiness, _Metallic;
 		fixed4 _Color;
 		float4 _WaveA, _WaveB, _WaveC;
-
-		float3 GerstnerWave (
-			float4 waveParameters, float3 position, inout float3 tangent, inout float3 binormal
-		) {
-			float steepness = waveParameters.z;
-			float wavelength = waveParameters.w;
-			float waveNumber = 2 * UNITY_PI / wavelength;
-			float phaseSpeed = sqrt(9.8 / waveNumber);
-			float2 direction = normalize(waveParameters.xy);
-			float phase = waveNumber * (dot(direction, position.xz) - phaseSpeed * _Time.y);
-			float amplitude = steepness / waveNumber;
-
-			float expSinPhase = exp(sin(phase));
-			float expCosPhase = exp(cos(phase));
-
-			tangent += float3(
-				-direction.x * direction.x * (steepness * expSinPhase),
-				direction.x * (steepness * expCosPhase),
-				-direction.x * direction.y * (steepness * expSinPhase)
-			);
-			binormal += float3(
-				-direction.x * direction.y * (steepness * expSinPhase),
-				direction.y * (steepness * expCosPhase),
-				-direction.y * direction.y * (steepness * expSinPhase)
-			);
-			return float3(
-				direction.x * (amplitude * expCosPhase),
-				amplitude * expSinPhase,
-				direction.y * (amplitude * expCosPhase)
-			);
-		}
 		
 
 		float3 ExpSineWave(float4 waveParameters, float3 position, float timeOffset) {
