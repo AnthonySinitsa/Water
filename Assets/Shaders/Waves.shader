@@ -1,7 +1,7 @@
 Shader "Custom/Waves" {
   	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
-		_Glossiness ("Smoothness", Rnage(0,1)) = 0.5
+		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 		_WaveA ("Wave A (dir, steepness, wavelength)", Vector) = (1,0,0.5,10)
 		_WaveB ("Wave B", Vector) = (0,1,0.25,20)
@@ -15,7 +15,7 @@ Shader "Custom/Waves" {
 		#pragma surface surf Standard fullforwardshadows vertex:vert addshadow
 		#pragma target 3.0
 
-		sampler2D _MainTex
+		sampler2D _MainTex;
 
 		struct Input {
 			float2 uv_MainTex;
