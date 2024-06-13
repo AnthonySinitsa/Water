@@ -56,14 +56,32 @@ Shader "Custom/Waves" {
 			);
 		}
 
+		float3 SumOfSinesWave(float4 waveParameters, float3 position) {
+            float steepness = waveParameters.z;
+            float wavelength = waveParameters.w;
+            float waveNumber = 2 * UNITY_PI / wavelength;
+            float phaseSpeed = sqrt(9.8 / waveNumber);
+            float2 direction = normalize(waveParameters.xy);
+            float phase = waveNumber * (dot(direction, position.xz) - phaseSpeed * _Time.y);
+            float amplitude = steepness / waveNumber;
+
+            float expSinPhase = exp(sin(phase));
+
+            return float3(
+                direction.x * (amplitude * exp(sin(phase))),
+                amplitude * exp(sin(phase)),
+                direction.y * (amplitude * exp(sin(phase)))
+            );
+        }
+
 		void vert(inout appdata_full vertexData) {
 			float3 gridPoint = vertexData.vertex.xyz;
 			float3 tangent = float3(1, 0, 0);
 			float3 binormal = float3(0, 0, 1);
 			float3 p = gridPoint;
-			p += GerstnerWave(_WaveA, gridPoint, tangent, binormal);
-			p += GerstnerWave(_WaveB, gridPoint, tangent, binormal);
-			p += GerstnerWave(_WaveC, gridPoint, tangent, binormal);
+			p += SumOfSinesWave(_WaveA, gridPoint);
+			p += SumOfSinesWave(_WaveB, gridPoint);
+			p += SumOfSinesWave(_WaveC, gridPoint);
 			float3 normal = normalize(cross(binormal, tangent));
 			vertexData.vertex.xyz = p;
 			vertexData.normal = normal;
