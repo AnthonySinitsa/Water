@@ -3,11 +3,7 @@ Shader "Custom/Brownian" {
         _Color ("Color", Color) = (1,1,1,1)
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
-        _InitialAmplitude ("Initial Amplitude", Float) = 1.0
-        _InitialFrequency ("Initial Frequency", Float) = 1.0
-        _Lacunarity ("Lacunarity (Frequency Multiplier)", Float) = 1.18
-        _Gain ("Gain (Amplitude Multiplier)", Float) = 0.82
-        _Octaves ("Number of Octaves", Int) = 5
+        _WaveCount ("Wave Count", Range(1, 10)) = 5
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -18,16 +14,14 @@ Shader "Custom/Brownian" {
         #pragma target 3.0
 
         sampler2D _MainTex;
+        float _Glossiness;
+        float _Metallic;
+        float _WaveCount;
+        fixed4 _Color;
 
         struct Input {
             float2 uv_MainTex;
         };
-
-        half _Glossiness;
-        half _Metallic;
-        fixed4 _Color;
-        float _InitialAmplitude, _InitialFrequency, _Lacunarity, _Gain;
-        int _Octaves;
 
         float hash(uint n) {
             n = (n << 13U) ^ n;
@@ -35,54 +29,36 @@ Shader "Custom/Brownian" {
             return float(n & uint(0x7fffffffU)) / float(0x7fffffff);
         }
 
-        float3 FractionalBrownianWave(float3 position, float timeOffset) {
-            float amplitude = _InitialAmplitude;
-            float frequency = _InitialFrequency;
-            float3 sumDisplacement = float3(0, 0, 0);
+        float2 BrownianWave(float2 position, float frequency, float amplitude) {
+            float2 direction = float2(hash(uint(position.x)), hash(uint(position.y))) * 2.0 - 1.0;
+            float wave = sin(dot(position, direction) * frequency);
+            float2 derivative = direction * frequency * cos(dot(position, direction) * frequency);
+            return float2(wave * amplitude, length(derivative) * amplitude);
+        }
 
-            for (int i = 0; i < _Octaves; i++) {
-                float2 direction = normalize(float2(hash(uint(i)), hash(uint(i + 1))));
-                float waveNumber = 2 * UNITY_PI * frequency;
-                float phaseSpeed = sqrt(9.8 / waveNumber);
-                float phase = waveNumber * (dot(direction, position.xz) - phaseSpeed * timeOffset);
+        float2 CalculateNormal(float2 position) {
+            float sumWave = 0.0;
+            float2 sumDerivative = float2(0.0, 0.0);
+            float frequency = 1.0;
+            float amplitude = 1.0;
 
-                float expSinPhase = exp(sin(phase));
-                float3 displacement = float3(
-                    direction.x * amplitude * expSinPhase,
-                    amplitude * expSinPhase,
-                    direction.y * amplitude * expSinPhase
-                );
+            for (int i = 0; i < _WaveCount; i++) {
+                float2 waveResult = BrownianWave(position, frequency, amplitude);
+                sumWave += waveResult.x;
+                sumDerivative += waveResult.y * amplitude;
 
-                sumDisplacement += displacement;
-
-                amplitude *= _Gain;
-                frequency *= _Lacunarity;
+                frequency *= 1.18;
+                amplitude *= 0.82;
             }
 
-            return sumDisplacement;
+            return sumDerivative;
         }
 
-        float3 CalculateNormal(float3 gridPoint, float3 displacement) {
-            float3 dx = float3(0.01, 0, 0);
-            float3 dz = float3(0, 0, 0.01);
-
-            float3 displacementX = FractionalBrownianWave(gridPoint + dx, _Time.y);
-            float3 displacementZ = FractionalBrownianWave(gridPoint + dz, _Time.y);
-
-            float3 tangent = dx + displacementX - displacement;
-            float3 binormal = dz + displacementZ - displacement;
-            return normalize(cross(tangent, binormal));
-        }
-
-        void vert(inout appdata_full vertexData) {
-            float3 gridPoint = vertexData.vertex.xyz;
-            float3 displacement = FractionalBrownianWave(gridPoint, _Time.y);
-
-            float3 newPosition = gridPoint + displacement;
-            float3 normal = CalculateNormal(gridPoint, displacement);
-
-            vertexData.vertex.xyz = newPosition;
-            vertexData.normal = normal;
+        void vert (inout appdata_full v) {
+            float2 position = v.vertex.xy;
+            float2 normalDerivative = CalculateNormal(position);
+            v.normal.xy = normalDerivative;
+            v.vertex.y += normalDerivative.x; // Apply wave height to vertex position
         }
 
         void surf (Input IN, inout SurfaceOutputStandard o) {
