@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class DynamicPlane : MonoBehaviour
+public class Waves : MonoBehaviour
 {
     public int resolution = 10;
     public float scale = 10f;
