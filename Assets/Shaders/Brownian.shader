@@ -3,15 +3,16 @@ Shader "Custom/Brownian" {
         _Color ("Color", Color) = (1,1,1,1)
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
-        _Octaves ("Octaves", Int) = 4
-        _Lacunarity ("Lacunarity", Float) = 2.0
-        _Gain ("Gain", Float) = 0.5
-        _WaveBase ("Base Wave (dir, steepness, wavelength)", Vector) = (1,0,0.5,10)
+        _InitialAmplitude ("Initial Amplitude", Float) = 1.0
+        _InitialFrequency ("Initial Frequency", Float) = 1.0
+        _Lacunarity ("Lacunarity (Frequency Multiplier)", Float) = 1.18
+        _Gain ("Gain (Amplitude Multiplier)", Float) = 0.82
+        _Octaves ("Number of Octaves", Int) = 5
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
         LOD 200
-    
+
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
         #pragma target 3.0
@@ -22,11 +23,11 @@ Shader "Custom/Brownian" {
             float2 uv_MainTex;
         };
 
-        half _Glossiness, _Metallic;
+        half _Glossiness;
+        half _Metallic;
         fixed4 _Color;
-        float4 _WaveBase;
+        float _InitialAmplitude, _InitialFrequency, _Lacunarity, _Gain;
         int _Octaves;
-        float _Lacunarity, _Gain;
 
         float hash(uint n) {
             n = (n << 13U) ^ n;
@@ -34,33 +35,39 @@ Shader "Custom/Brownian" {
             return float(n & uint(0x7fffffffU)) / float(0x7fffffff);
         }
 
-        float3 ExpSineWave(float3 position, float timeOffset) {
-            float3 sum = float3(0, 0, 0);
-            float amplitude = 1.0;
-            float frequency = 1.0;
+        float3 FractionalBrownianWave(float3 position, float timeOffset) {
+            float amplitude = _InitialAmplitude;
+            float frequency = _InitialFrequency;
+            float3 sumDisplacement = float3(0, 0, 0);
 
             for (int i = 0; i < _Octaves; i++) {
-                float waveNumber = 2 * UNITY_PI / (_WaveBase.w / frequency);
+                float2 direction = normalize(float2(hash(uint(i)), hash(uint(i + 1))));
+                float waveNumber = 2 * UNITY_PI * frequency;
                 float phaseSpeed = sqrt(9.8 / waveNumber);
-                float2 direction = normalize(float2(hash(i * 13U), hash(i * 31U)) * 2.0 - 1.0);
                 float phase = waveNumber * (dot(direction, position.xz) - phaseSpeed * timeOffset);
-                float currentWave = amplitude * exp(sin(phase));
 
-                sum += float3(direction.x * currentWave, currentWave, direction.y * currentWave);
+                float expSinPhase = exp(sin(phase));
+                float3 displacement = float3(
+                    direction.x * amplitude * expSinPhase,
+                    amplitude * expSinPhase,
+                    direction.y * amplitude * expSinPhase
+                );
 
-                frequency *= _Lacunarity;
+                sumDisplacement += displacement;
+
                 amplitude *= _Gain;
+                frequency *= _Lacunarity;
             }
 
-            return sum;
+            return sumDisplacement;
         }
 
         float3 CalculateNormal(float3 gridPoint, float3 displacement) {
             float3 dx = float3(0.01, 0, 0);
             float3 dz = float3(0, 0, 0.01);
 
-            float3 displacementX = ExpSineWave(gridPoint + dx, _Time.y);
-            float3 displacementZ = ExpSineWave(gridPoint + dz, _Time.y);
+            float3 displacementX = FractionalBrownianWave(gridPoint + dx, _Time.y);
+            float3 displacementZ = FractionalBrownianWave(gridPoint + dz, _Time.y);
 
             float3 tangent = dx + displacementX - displacement;
             float3 binormal = dz + displacementZ - displacement;
@@ -69,7 +76,7 @@ Shader "Custom/Brownian" {
 
         void vert(inout appdata_full vertexData) {
             float3 gridPoint = vertexData.vertex.xyz;
-            float3 displacement = ExpSineWave(gridPoint, _Time.y);
+            float3 displacement = FractionalBrownianWave(gridPoint, _Time.y);
 
             float3 newPosition = gridPoint + displacement;
             float3 normal = CalculateNormal(gridPoint, displacement);

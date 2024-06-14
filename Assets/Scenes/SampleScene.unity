@@ -141,7 +141,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &64891613
 Transform:
   m_ObjectHideFlags: 0
@@ -171,9 +171,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resolution: 150
   scale: 100
-  octaves: 4
-  lacunarity: 2
-  gain: 0.5
 --- !u!23 &64891615
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -242,7 +239,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &601125495
 Transform:
   m_ObjectHideFlags: 0
@@ -322,9 +319,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resolution: 150
   scale: 100
-  octaves: 4
-  lacunarity: 2
-  gain: 0.5
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

@@ -65,15 +65,17 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _Gain: 0.5
+    - _Gain: 0.05
     - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _Glossiness: 0.7
     - _GlossyReflections: 1
-    - _Lacunarity: 2
+    - _InitialAmplitude: 0.82
+    - _InitialFrequency: 1.18
+    - _Lacunarity: 0.23
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
-    - _Octaves: 4
+    - _Octaves: 1.78
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -83,5 +85,8 @@ Material:
     m_Colors:
     - _Color: {r: 0.23487006, g: 0.43142802, b: 0.5471698, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _WaveA: {r: 1, g: 0, b: 0.5, a: 10}
+    - _WaveB: {r: 0, g: 1, b: 0.25, a: 20}
     - _WaveBase: {r: 1, g: 0, b: 0.5, a: 10}
+    - _WaveC: {r: 1, g: 1, b: 0.15, a: 10}
   m_BuildTextureStacks: []

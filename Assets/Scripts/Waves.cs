@@ -6,27 +6,13 @@ public class Waves : MonoBehaviour
     public int resolution = 10;
     public float scale = 10f;
 
-    public int octaves = 4;
-    public float lacunarity = 2.0f;
-    public float gain = 0.5f;
-
     private MeshFilter meshFilter;
     private bool isMeshGenerated = false;
-    private Material material;
-
-    void Start() {
-        meshFilter = GetComponent<MeshFilter>();
-        material = GetComponent<Renderer>().material;
-        GenerateMesh();
-    }
 
     void Update()
     {
-        if (material != null) {
-            material.SetInt("_Octaves", octaves);
-            material.SetFloat("_Lacunarity", lacunarity);
-            material.SetFloat("_Gain", gain);
-        }
+        meshFilter = GetComponent<MeshFilter>();
+        GenerateMesh();
     }
 
     void GenerateMesh()
