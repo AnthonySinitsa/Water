@@ -1,9 +1,11 @@
-Shader "Custom/Brownian" {
+Shader "Custom/BrownianWater" {
     Properties {
         _Color ("Color", Color) = (1,1,1,1)
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
-        _WaveCount ("Wave Count", Range(1, 10)) = 5
+        _Amplitude ("Amplitude", Range(0, 1)) = 0.1
+        _Frequency ("Frequency", Range(0, 10)) = 1.0
+        _Speed ("Speed", Range(0, 10)) = 1.0
     }
     SubShader {
         Tags { "RenderType"="Opaque" }
@@ -14,51 +16,52 @@ Shader "Custom/Brownian" {
         #pragma target 3.0
 
         sampler2D _MainTex;
-        float _Glossiness;
-        float _Metallic;
-        float _WaveCount;
-        fixed4 _Color;
 
         struct Input {
             float2 uv_MainTex;
         };
 
-        float hash(uint n) {
-            n = (n << 13U) ^ n;
-            n = n * (n * n * 15731U + 0x789221U) + 0x1376312589U;
-            return float(n & uint(0x7fffffffU)) / float(0x7fffffff);
+        half _Glossiness;
+        half _Metallic;
+        fixed4 _Color;
+        half _Amplitude;
+        half _Frequency;
+        half _Speed;
+
+        // Random direction method
+        float2 RandomDirection() {
+            return normalize(float2(Random.Range(-1, 1), Random.Range(-1, 1)));
         }
 
-        float2 BrownianWave(float2 position, float frequency, float amplitude) {
-            float2 direction = float2(hash(uint(position.x)), hash(uint(position.y))) * 2.0 - 1.0;
-            float wave = sin(dot(position, direction) * frequency);
-            float2 derivative = direction * frequency * cos(dot(position, direction) * frequency);
-            return float2(wave * amplitude, length(derivative) * amplitude);
-        }
-
-        float2 CalculateNormal(float2 position) {
-            float sumWave = 0.0;
-            float2 sumDerivative = float2(0.0, 0.0);
-            float frequency = 1.0;
-            float amplitude = 1.0;
-
-            for (int i = 0; i < _WaveCount; i++) {
-                float2 waveResult = BrownianWave(position, frequency, amplitude);
-                sumWave += waveResult.x;
-                sumDerivative += waveResult.y * amplitude;
-
-                frequency *= 1.18;
-                amplitude *= 0.82;
+        // Brownian wave method
+        float BrownianWave(float2 position, float time) {
+            float frequency = _Frequency;
+            float amplitude = _Amplitude;
+            float value = 0.0;
+            float persistence = 0.5;
+            float lacunarity = 2.0;
+            for (int i = 0; i < 4; i++) {
+                value += Mathf.PerlinNoise(position.x * frequency, position.y * frequency) * amplitude;
+                frequency *= lacunarity;
+                amplitude *= persistence;
             }
-
-            return sumDerivative;
+            return value * Mathf.Sin(time * _Speed);
         }
 
-        void vert (inout appdata_full v) {
-            float2 position = v.vertex.xy;
-            float2 normalDerivative = CalculateNormal(position);
-            v.normal.xy = normalDerivative;
-            v.vertex.y += normalDerivative.x; // Apply wave height to vertex position
+        // Calculate normal method
+        void CalculateNormal(float3 position, inout float3 normal) {
+            float3 dx = ddx(position);
+            float3 dy = ddy(position);
+            normal = normalize(cross(dx, dy));
+        }
+
+        void vert(inout appdata_full v, out Input o) {
+            float2 randomDir = RandomDirection();
+            float wave = BrownianWave(v.vertex.xz + _Time.y * _Speed, _Time.y);
+            v.vertex.y += wave * _Amplitude; // Displace the vertex in y direction
+            CalculateNormal(v.vertex, v.normal); // Calculate normal
+
+            o.uv_MainTex = v.texcoord;
         }
 
         void surf (Input IN, inout SurfaceOutputStandard o) {
