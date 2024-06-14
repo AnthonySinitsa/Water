@@ -1,15 +1,14 @@
 # Water
 
-### First sum of sines waves
-![1](images/water1.gif)
-### Lambertian diffuse lighting
-![2](images/water2.gif)
+A study of different ways to render water
+
+### Sum of Sines using Eulers Number
+![1](images/Eulersos.gif)
+
+### Gerstner Wave
+![2](images/Gerstner.gif)
  
 ## Steps Taken
-
-- Render simple plane
-
-- Give plane many vertices
 
 - Displace the vertices according to the sum of sines
 
