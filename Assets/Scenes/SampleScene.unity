@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d50576610964bdc4e89d6f33e99980c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 150
+  resolution: 100
   scale: 100
 --- !u!23 &64891615
 MeshRenderer:
@@ -317,8 +317,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d50576610964bdc4e89d6f33e99980c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 150
-  scale: 100
+  resolution: 10
+  scale: 10
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

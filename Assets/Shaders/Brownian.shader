@@ -8,6 +8,7 @@ Shader "Custom/SineWaveSurfaceShader"
         _Amplitude ("Amplitude", Float) = 0.5
         _Frequency ("Frequency", Float) = 1.0
         _Speed ("Speed", Float) = 1.0
+        _WaveDirection ("Wave Direction", Vector) = (1,0,0,0)
     }
     SubShader
     {
@@ -23,15 +24,25 @@ Shader "Custom/SineWaveSurfaceShader"
         };
 
         float _Amplitude, _Frequency, _Speed;
+        float4 _WaveDirection;
         fixed4 _Color;
 
         half _Glossiness;
         half _Metallic;
 
+        float hash(uint n) {
+            // integer hash copied from Hugo Elias
+            n = (n << 13U) ^ n;
+            n = n * (n * n * 15731U + 0x789221U) + 0x1376312589U;
+            return float(n & uint(0x7fffffffU)) / float(0x7fffffff);
+        }
+
         // Custom methods for sine wave and normal calculation
         float BrownianWave(float3 pos)
         {
-            return _Amplitude * sin(_Frequency * (pos.x + _Time * _Speed)) * sin(_Frequency * (pos.z + _Time * _Speed));
+            float3 direction = hash(asuint(normalize(_WaveDirection.xyz)));
+            float wave = dot(direction, pos.xz);
+            return _Amplitude * sin(_Frequency * (wave + _Time * _Speed));
         }
 
         float3 CalculateNormal(float3 pos)
