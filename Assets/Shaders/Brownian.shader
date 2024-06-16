@@ -1,72 +1,75 @@
-Shader "Custom/Brownian" {
-    Properties {
+Shader "Custom/Brownian"
+{
+    Properties
+    {
         _Color ("Color", Color) = (1,1,1,1)
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
-        _WaveCount ("Wave Count", Range(1, 10)) = 5
+        _Glossiness ("Smoothness", Range(0.0,1.0)) = 0.5
+        _Metallic ("Metallic", Range(0.0,1.0)) = 0.0
+        _Amplitude ("Amplitude", Float) = 0.5
+        _Frequency ("Frequency", Float) = 1.0
+        _Speed ("Speed", Float) = 1.0
+        _WaveDirection ("Wave Direction", Vector) = (1,0,0,0)
     }
-    SubShader {
+    SubShader
+    {
         Tags { "RenderType"="Opaque" }
         LOD 200
 
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
-        #pragma target 3.0
 
-        sampler2D _MainTex;
-        float _Glossiness;
-        float _Metallic;
-        float _WaveCount;
-        fixed4 _Color;
-
-        struct Input {
+        struct Input
+        {
             float2 uv_MainTex;
         };
 
+        float _Amplitude, _Frequency, _Speed;
+        float4 _WaveDirection;
+        fixed4 _Color;
+
+        half _Glossiness;
+        half _Metallic;
+
         float hash(uint n) {
+            // integer hash copied from Hugo Elias
             n = (n << 13U) ^ n;
             n = n * (n * n * 15731U + 0x789221U) + 0x1376312589U;
             return float(n & uint(0x7fffffffU)) / float(0x7fffffff);
         }
 
-        float2 BrownianWave(float2 position, float frequency, float amplitude) {
-            float2 direction = float2(hash(uint(position.x)), hash(uint(position.y))) * 2.0 - 1.0;
-            float wave = sin(dot(position, direction) * frequency);
-            float2 derivative = direction * frequency * cos(dot(position, direction) * frequency);
-            return float2(wave * amplitude, length(derivative) * amplitude);
+        // Custom methods for sine wave and normal calculation
+        float BrownianWave(float3 pos)
+        {
+            float3 direction = hash(asuint(normalize(_WaveDirection.xyz)));
+            float wave = dot(direction, pos.xz);
+            return _Amplitude * sin(_Frequency * (wave + _Time * _Speed));
         }
 
-        float2 CalculateNormal(float2 position) {
-            float sumWave = 0.0;
-            float2 sumDerivative = float2(0.0, 0.0);
-            float frequency = 1.0;
-            float amplitude = 1.0;
-
-            for (int i = 0; i < _WaveCount; i++) {
-                float2 waveResult = BrownianWave(position, frequency, amplitude);
-                sumWave += waveResult.x;
-                sumDerivative += waveResult.y * amplitude;
-
-                frequency *= 1.18;
-                amplitude *= 0.82;
-            }
-
-            return sumDerivative;
+        float3 CalculateNormal(float3 pos)
+        {
+            float delta = 0.01;
+            float hL = BrownianWave(pos + float3(-delta, 0, 0));
+            float hR = BrownianWave(pos + float3(delta, 0, 0));
+            float hD = BrownianWave(pos + float3(0, 0, -delta));
+            float hU = BrownianWave(pos + float3(0, 0, delta));
+            float3 n = normalize(float3(hL - hR, 2.0 * delta, hD - hU));
+            return n;
         }
 
-        void vert (inout appdata_full v) {
-            float2 position = v.vertex.xy;
-            float2 normalDerivative = CalculateNormal(position);
-            v.normal.xy = normalDerivative;
-            v.vertex.y += normalDerivative.x; // Apply wave height to vertex position
+        void vert (inout appdata_full v)
+        {
+            float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+            worldPos.y += BrownianWave(worldPos);
+            v.vertex = mul(unity_WorldToObject, float4(worldPos, 1.0));
+            v.normal = CalculateNormal(worldPos);
         }
 
-        void surf (Input IN, inout SurfaceOutputStandard o) {
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-            o.Albedo = c.rgb;
+        void surf (Input IN, inout SurfaceOutputStandard o)
+        {
+            // Albedo and other surface properties
+            o.Albedo = _Color.rgb;
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
-            o.Alpha = c.a;
         }
         ENDCG
     }
