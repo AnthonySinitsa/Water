@@ -1,4 +1,4 @@
-Shader "Custom/SineWaveSurfaceShader"
+Shader "Custom/Brownian"
 {
     Properties
     {
